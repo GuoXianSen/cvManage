@@ -14,13 +14,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User findUserByName(String username) {
-        User u = userMapper.findUserByName(username);
-        return u;
+        return userMapper.findUserByName(username);
     }
 
     @Override
     public void register(String username, String password) {
-        String md5Pwd = Md5Util.getMD5String(username);
+        String md5Pwd = Md5Util.getMD5String(password);
         userMapper.add(username,md5Pwd);
     }
 }
