@@ -5,6 +5,7 @@ import com.gyz.cvmanage.pojo.User;
 import com.gyz.cvmanage.service.UserService;
 import com.gyz.cvmanage.util.JwtUtil;
 import com.gyz.cvmanage.util.Md5Util;
+import com.gyz.cvmanage.util.ThreadLocalUtil;
 import jakarta.validation.constraints.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -42,6 +43,7 @@ public class UserController {
         }
         if (Md5Util.getMD5String(password).equals(loginUser.getPassword())) {
             Map<String, Object> claims = new HashMap<>();
+            // 存储到ThreadLocal中的业务数据 这里跟需要来即可
             claims.put("id", loginUser.getId());
             claims.put("username", loginUser.getUsername());
             String token = JwtUtil.genToken(claims);
@@ -52,10 +54,13 @@ public class UserController {
     }
 
     @GetMapping("/userInfo")
-    public Result<User> userInfo(@RequestHeader(name = "Authorization") String token) {
+    public Result<User> userInfo(/* @RequestHeader(name = "Authorization") String token */) {
         // 根据用户名查询用户
-        Map<String, Object> map = JwtUtil.parseToken(token);
+        // Map<String, Object> map = JwtUtil.parseToken(token);
+        // String username = (String) map.get("username");
+        Map<String, Object> map = ThreadLocalUtil.get();
         String username = (String) map.get("username");
+
         User user = userService.findUserByName(username);
         return Result.success(user);
     }
