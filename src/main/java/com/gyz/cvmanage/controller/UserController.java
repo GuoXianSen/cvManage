@@ -9,6 +9,7 @@ import com.gyz.cvmanage.util.ThreadLocalUtil;
 import jakarta.validation.constraints.Pattern;
 import org.hibernate.validator.constraints.URL;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -75,8 +76,33 @@ public class UserController {
 
 
     @PatchMapping("/updateAvatar")
-    public Result updateAvatar(@RequestParam @URL String avatarUrl){
+    public Result updateAvatar(@RequestParam @URL String avatarUrl) {
         userService.updateAvatar(avatarUrl);
+        return Result.success();
+    }
+
+    @PatchMapping("/updatePwd")
+    public Result updatePwd(@RequestBody Map<String, String> params) {
+        // 校验参数  校验密码
+        String oldPwd = params.get("old_pwd");
+        String newPwd = params.get("new_pwd");
+        String rePwd = params.get("re_pwd");
+        // 调用service
+        if (!StringUtils.hasLength(oldPwd) || !StringUtils.hasLength(newPwd) || !StringUtils.hasLength(rePwd)) {
+            return Result.error("缺少必要的参数");
+        }
+        // 校验原密码是否正确
+        // 调用userService根据用户名拿到原密码，再和old_pwd对比
+        Map<String, Object> map = ThreadLocalUtil.get();
+        String username = (String) map.get("username");
+        User loginUser = userService.findUserByName(username);
+        if (!Md5Util.getMD5String(oldPwd).equals(loginUser.getPassword())){
+            return Result.error("原密码输入错误，请重新输入");
+        }
+        if (!newPwd.equals(rePwd)){
+            return Result.error("两次密码输入不一致，请重新输入");
+        }
+        userService.updatePwd(newPwd);
         return Result.success();
     }
 
