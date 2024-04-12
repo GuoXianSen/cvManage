@@ -7,6 +7,8 @@ import com.gyz.cvmanage.util.Md5Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 public class UserServiceImpl implements UserService {
     @Autowired
@@ -21,5 +23,11 @@ public class UserServiceImpl implements UserService {
     public void register(String username, String password) {
         String md5Pwd = Md5Util.getMD5String(password);
         userMapper.add(username,md5Pwd);
+    }
+
+    @Override
+    public void update(User user) {
+        user.setUpdateTime(LocalDateTime.now()); // 设置更新的时间为当前时间
+        userMapper.update(user);
     }
 }
